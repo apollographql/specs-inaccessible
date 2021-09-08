@@ -1,0 +1,47 @@
+directive @core(as: String, feature: String!, for: core__Purpose) repeatable on SCHEMA
+directive @join__field(graph: join__Graph, provides: join__FieldSet, requires: join__FieldSet) on FIELD_DEFINITION
+directive @join__graph(name: String!, url: String!) on ENUM_VALUE
+directive @join__owner(graph: join__Graph!) on INTERFACE | OBJECT
+directive @join__type(graph: join__Graph!, key: join__FieldSet) repeatable on INTERFACE | OBJECT
+
+scalar join__FieldSet
+
+enum join__Graph {
+  USERS @join__graph(name: "users", url: "https://users.api.com")
+  BANKING @join__graph(name: "banking", url: "https://banking.api.com")
+}
+
+enum core__Purpose {
+  EXECUTION
+  SECURITY
+}
+
+directive @inaccessible on FIELD_DEFINITION | OBJECT | INTERFACE | UNION
+
+schema
+  @core(feature: "https://specs.apollo.dev/core/v0.2"),
+  @core(feature: "https://specs.apollo.dev/join/v0.1", for: EXECUTION),
+  @core(feature: "https://specs.apollo.dev/inaccessible/v0.1", for: SECURITY)
+{
+  query: Query
+}
+
+type Query {
+  user(id: String!): User
+}
+
+type User
+  @join__owner(graph: USERS)
+  @join__type(graph: USERS, key: "id")
+  @join__type(graph: BANKING, key: "id")
+{
+  id: String! @join__field(graph: USERS) @inaccessible
+  name: String! @join__field(graph: USERS)
+  email: String! @join__field(graph: USERS)
+  bankAccount: BankAccount @join__field(graph: BANKING)
+}
+
+type BankAccount @inaccessible {
+  id: String!
+  accountNumber: String!
+}
