@@ -72,5 +72,5 @@ In order to use the directive described by this specification, GraphQL requires 
 * Processors MUST remove all fields which return an Object, Interface, or Union type with an `@inaccessible` directive applied.
 * Processors MUST remove all `@inaccessible` Object types belonging to a Union. If the Union is left with no types, it MUST also be removed.
 * Processors MUST remove all fields which return a Union type which has been removed for the reason listed above.
-* Processors SHOULD remove the `@inaccessible` directive definition, provided there are no usages remaining in the API schema after the previous steps.
-* Processors SHOULD remove the `@core` usage which references this spec, provided there are no `@inaccessible` usages remaining in the API schema after the previous steps and the `@inaccessible` directive definition has been removed.
+* Processors SHOULD remove the `@inaccessible` directive definition, provided there are no usages remaining in the processed schema after the previous steps.
+* Processors SHOULD remove the `@core` usage which references this spec, provided there are no `@inaccessible` usages remaining in the processed schema after the previous steps and the `@inaccessible` directive definition has been removed.
