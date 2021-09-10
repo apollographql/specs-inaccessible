@@ -65,12 +65,23 @@ In order to use the directive described by this specification, GraphQL requires 
 
 :::[definition](inaccessible.spec.graphql)
 
+## Producer Responsibilities
+
+[Producers](https://specs.apollo.dev/core/v0.2/#sec-Actors) MUST include a definition of the directive compatible with the above definition and all usages in the document.
+
 ## Processor Responsibilities
-* Processors MUST validate that you have defined the directive with the same locations and no arguments, as provided above.
-* Processors MUST remove all fields with an `@inaccessible` directive applied.
-* Processors MUST remove all Object, Interface, and Union types with an `@inaccessible` directive applied.
-* Processors MUST remove all fields which return an Object, Interface, or Union type with an `@inaccessible` directive applied.
-* Processors MUST remove all `@inaccessible` Object types belonging to a Union. If the Union is left with no types, it MUST also be removed.
-* Processors MUST remove all fields which return a Union type which has been removed for the reason listed above.
-* Processors SHOULD remove the `@inaccessible` directive definition, provided there are no usages remaining in the processed schema after the previous steps.
-* Processors SHOULD remove the `@core` usage which references this spec, provided there are no `@inaccessible` usages remaining in the processed schema after the previous steps and the `@inaccessible` directive definition has been removed.
+
+The Processor is responsible for removing all inaccessible elements from the schema output. Note in the `InaccessibleRemoval` algorithm below that because a Union can belong to another Union's set of types, the removal of a Union type may have an upwards "cascading" effect, causing other Unions to become candidates for removal.
+
+InaccessibleRemoval() :
+  1. Collect types for removal.
+    * Collect all Object types marked as `@inaccessible`.
+    * TODO: interfaces ??
+    * Collect all Union types whose types are **all** marked as `@inaccessible`.
+      * If any Union types were collected, revisit uncollected Unions for possible removal due to  Union "nesting".
+      * Repeat until no more Unions are collected.
+  1. Remove all Object, Interface, and Unions collected for removal.
+  1. Remove all fields which return an Object, Interface, or Union which was removed.
+  1. TODO: validate - Remove all Object types which no longer have fields due to prior field removal.
+  1. _(optional)_ Remove the `@inaccessible` directive definition, provided there are no usages remaining in the processed schema.
+  1. _(optional)_ Remove the `@core` usage which references this spec, provided there are no `@inaccessible` usages remaining in the processed schema and the `@inaccessible` directive definition has been removed.
