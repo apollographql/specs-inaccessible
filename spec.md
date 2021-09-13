@@ -75,13 +75,13 @@ The Processor is responsible for removing all inaccessible elements from the sch
 
 InaccessibleRemoval() :
   1. Collect types for removal.
-    * Collect all Object types marked as `@inaccessible`.
-    * TODO: interfaces ??
+    * Collect all Object and Interface types marked as `@inaccessible`.
     * Collect all Union types whose types are **all** marked as `@inaccessible`.
-      * If any Union types were collected, revisit uncollected Unions for possible removal due to  Union "nesting".
+      * If any Union types were collected, revisit uncollected Unions for possible removal due to  Union "nesting" (Unions composed of other Unions).
       * Repeat until no more Unions are collected.
   1. Remove all Object, Interface, and Unions collected for removal.
   1. Remove all fields which return an Object, Interface, or Union which was removed.
-  1. TODO: validate - Remove all Object types which no longer have fields due to prior field removal.
+  1. Remove all Object types which no longer have fields due to prior field removal.
+  1. Remove all references to Interface types marked as `@inaccessible`. Object types must have inaccessible Interfaces removed from their list of implementations. (i.e. `type Object implements X & Y { ... }`)
   1. _(optional)_ Remove the `@inaccessible` directive definition, provided there are no usages remaining in the processed schema.
   1. _(optional)_ Remove the `@core` usage which references this spec, provided there are no `@inaccessible` usages remaining in the processed schema and the `@inaccessible` directive definition has been removed.
