@@ -21,7 +21,7 @@ This document uses [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt) guidance reg
 
 ## What this document isn't
 
-This document specifies only the processing of core schema. The mechanics of field and type omission are not specified normatively here. Conforming implementations may choose any approach they like, so long as the result conforms to the requirements of this document.
+This document specifies only the processing of a core schema. The mechanics of field and type omission are not specified normatively here. Conforming implementations may choose any approach they like, so long as the result conforms to the requirements of this document.
 
 # Definitions
 
@@ -75,7 +75,7 @@ The Processor is responsible for removing all inaccessible elements from the sch
 
 InaccessibleRemoval() :
   1. Collect types for removal.
-    * Collect all Object and Interface types marked as `@inaccessible`.
+    * Collect all Object, Interface, and Union types marked as `@inaccessible`.
     * Collect all Union types whose types are **all** marked as `@inaccessible`.
       * If any Union types were collected, revisit uncollected Unions for possible removal due to  Union "nesting" (Unions composed of other Unions).
       * Repeat until no more Unions are collected.
