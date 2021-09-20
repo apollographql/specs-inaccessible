@@ -73,15 +73,52 @@ In order to use the directive described by this specification, GraphQL requires 
 
 The Processor is responsible for removing all inaccessible elements from the schema output. Note in the `InaccessibleRemoval` algorithm below that because a Union can belong to another Union's set of types, the removal of a Union type may have an upwards "cascading" effect, causing other Unions to become candidates for removal.
 
-InaccessibleRemoval() :
-  1. Collect types for removal.
-    * Collect all Object and Interface types marked as `@inaccessible`.
-    * Collect all Union types whose types are **all** marked as `@inaccessible`.
-      * If any Union types were collected, revisit uncollected Unions for possible removal due to  Union "nesting" (Unions composed of other Unions).
-      * Repeat until no more Unions are collected.
-  1. Remove all Object, Interface, and Unions collected for removal.
-  1. Remove all fields which return an Object, Interface, or Union which was removed.
-  1. Remove all Object types which no longer have fields due to prior field removal.
-  1. Remove all references to Interface types marked as `@inaccessible`. Object types must have inaccessible Interfaces removed from their list of implementations. (i.e. `type Object implements X & Y { ... }`)
-  1. _(optional)_ Remove the `@inaccessible` directive definition, provided there are no usages remaining in the processed schema.
-  1. _(optional)_ Remove the `@core` usage which references this spec, provided there are no `@inaccessible` usages remaining in the processed schema and the `@inaccessible` directive definition has been removed.
+
+# Algorithms
+
+## Is Inaccessible?
+
+Return true if the named element {element} is inaccessible.
+
+IsInaccessible(document, element) :
+  1. If {element} is a FieldDefinition, **Return** {IsMarkedInaccessible(document, element)}
+  2. For each Definition or Extension {e} in {document},
+    - If {e} and {element} have the same Name and {IsMarkedInaccessible(document, e)}, **Return** true
+  3. **Return** false
+
+Return true iff the named element {element} is marked as inaccessible.
+
+IsMarkedInaccessible(document, element) :
+  1. Let {assignments} be the result of assigning features via {AssignFeatures(document)}
+  2. For each Directive {d} on {element},
+    1. If {assignments}`[`{element}`]` is a Directive whose `feature` argument is this spec, **Return** {true}
+  3. **Return** {false}
+
+## Removed Inaccessible Elements
+
+Given a schema document, return the set of all schema elements which should be removed in the API.
+
+RemoveInaccessible(document) :
+  1. For each named schema element {e} defined in the {document},
+    1. If {IsInaccessible(document, e)} is {true}, {Remove(document, e)}
+
+Remove(document, element) :
+  1. If {element} is a Field or Input Field,
+    1. Delete the definition of {element} in {document}
+    2. Let {parent} be the parent type of {f} in {document}
+      2. If {parent} has no fields, {Remove(document, parent)}
+  2. If {element} is a type:
+    1. Delete all definitions and extensions of {element} in {document}    
+    2. If {element} is an output type (object type, interface type, or union type),
+      1. For each Field {f} in {document} where {f} has a Return Type of {element}, {Remove(document, f)}
+      2. For each Union {u} in {document} where {element} is a member of {u},
+        1. Delete {element} as member of {u}
+        2. If {u} has no members, {Remove(document, u)}
+      3. If {element} is an interface,
+        1. For each type or interface {t} which implements {element} in {document},
+          - Delete {element} as an interface conformance of {t}
+    3. If {element} is an input type (scalar, enum, or input object type):
+      1. For each Field {f} in {document} where {f} has any argument of type {element}, {Remove(document, f)}
+      2. For each input object type {t} in {document},
+        1. For each input field {f} of {t} where the type of {f} is {element}, {Remove(document, f)}
+
