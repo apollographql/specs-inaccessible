@@ -21,7 +21,7 @@ This document uses [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt) guidance reg
 
 ## What this document isn't
 
-This document specifies only the processing of core schema. The mechanics of field and type omission are not specified normatively here. Conforming implementations may choose any approach they like, so long as the result conforms to the requirements of this document.
+This document specifies only the processing of a core schema. The mechanics of field and type omission are not specified normatively here. Conforming implementations may choose any approach they like, so long as the result conforms to the requirements of this document.
 
 # Definitions
 
@@ -72,8 +72,6 @@ In order to use the directive described by this specification, GraphQL requires 
 ## Processor Responsibilities
 
 The Processor is responsible for removing all inaccessible elements from the schema output. Note in the `InaccessibleRemoval` algorithm below that because a Union can belong to another Union's set of types, the removal of a Union type may have an upwards "cascading" effect, causing other Unions to become candidates for removal.
-
-
 # Algorithms
 
 ## Is Inaccessible?
