@@ -79,10 +79,11 @@ The Processor is responsible for removing all inaccessible elements from the sch
 Return true if the named element {element} is inaccessible.
 
 IsInaccessible(document, element) :
-  1. If {element} is a FieldDefinition, **Return** {IsMarkedInaccessible(document, element)}
-  2. For each Definition or Extension {e} in {document},
-    - If {e} and {element} have the same Name and {IsMarkedInaccessible(document, e)}, **Return** true
-  3. **Return** false
+  0. If {IsMarkedInaccessible(document, element)}, **Return** {true}
+  1. If {element} is a FieldDefinition,
+    1. Let {parent} be the parent definition for {element}
+    2. If {IsMarkedInaccessible(document, parent)}, **Return** {true}
+  2. **Return** {false}
 
 Return true iff the named element {element} is marked as inaccessible.
 
@@ -107,16 +108,17 @@ Remove(document, element) :
       2. If {parent} has no fields, {Remove(document, parent)}
   2. If {element} is a type:
     1. Delete all definitions and extensions of {element} in {document}    
-    2. If {element} is an output type (object type, interface type, or union type),
+    2. If {element} is an output type (object, interface, union, or scalar):
       1. For each Field {f} in {document} where {f} has a Return Type of {element}, {Remove(document, f)}
-      2. For each Union {u} in {document} where {element} is a member of {u},
-        1. Delete {element} as member of {u}
-        2. If {u} has no members, {Remove(document, u)}
-      3. If {element} is an interface,
-        1. For each type or interface {t} which implements {element} in {document},
-          - Delete {element} as an interface conformance of {t}
-    3. If {element} is an input type (scalar, enum, or input object type):
+    3. If {element} is an input type (input object, enum, or scalar):
       1. For each Field {f} in {document} where {f} has any argument of type {element}, {Remove(document, f)}
       2. For each input object type {t} in {document},
         1. For each input field {f} of {t} where the type of {f} is {element}, {Remove(document, f)}
+    4. If {element} is an Object or Union type,
+      2. For each Union {u} in {document} where {element} is a member of {u},
+        1. Delete {element} as member of {u}
+        2. If {u} has no members, {Remove(document, u)}
+    5. If {element} is an Interface type,
+      3. For each Object or Interface type {t} which implements {element} in {document},
+        1. Delete {element} as an interface conformance of {t}
 
