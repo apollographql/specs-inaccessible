@@ -27,7 +27,7 @@ This document specifies only the processing of a core schema. The mechanics of f
 
 ## Processor
 
-This specification makes references to **Processors**. Processors are described in the [Actors section of the `@core` spec](https://specs.apollo.dev/core/v0.2/#sec-Actors) as an actor which can perform transformations on a core schema. In the case of `@inaccessible`, the Processor will be expected to remove various parts of a core schema.
+This specification makes references to **Processors**. Processors are described in the [Actors section of the `@core` spec](https://specs.apollo.dev/core/v0.2/#sec-Actors) as an actor which can perform transformations on a core schema. In the case of `@inaccessible`, the Processor will be expected to validate `@inaccessible` directive applications in a core schema and remove various parts from that core schema.
 
 # Example: Sensitive User Data
 
@@ -37,11 +37,13 @@ We'll refer to this example of a core schema with sensitive user data throughout
 
 :::[example](./schema.graphql) -- Core schema example
 
-The schema above contains both a field (`User.id`) and type (`BankAccount`) that are marked as `@inaccessible`. These symbols should be omitted from the processed schema anywhere they would appear. When the processed schema below is generated from this core schema, notice what has been removed:
+The schema above contains two fields (`User.id` and `User.bankAccount`) and one type (`BankAccount`) that are marked as `@inaccessible`. Validation should check that when these `@inaccessible` schema elements are used in the definitions of non-`@inaccessible` schema elements, those definitions should be valid if the `@inaccessible` elements are omitted. These schema elements should then be omitted from the processed schema. When the processed schema below is generated from this core schema, notice what has been removed:
 * `User.id` field
-* `BankAccount` type
-* `User.bankAccount` field (because it _returns_ the `BankAccount` type)
-* `Account` union's `BankAccount` type
+* `BankAccount` object type
+* `User.bankAccount` field
+  * If this field weren't marked `@inaccessible`, validation would fail since the field's return type is `BankAccount` (and a field must have a return type).
+* `Account` union type's `BankAccount` member
+  * This union type is still valid since there's at least one member remaining, so this doesn't need to be marked `@inaccessible`.
 
 :::[example](./processedSchema.graphql) -- Core schema after processing
 
@@ -61,6 +63,8 @@ Here is an example `@core` usage:
 
 As described in the [core schema specification](https://specs.apollo.dev/core/v0.2/#sec-Prefixing), your schema may prefix the `@inaccessible` directive by including an `as` argument to the `@core` directive which references this specification. All references to `@inaccessible` in this specification MUST be interpreted as referring to names with the appropriate prefix chosen within your schema.
 
+When using `@core` v0.2, your schema should provide `SECURITY` as the `for` argument to the `@core` directive which references this specification. This is because `@inaccessible` is usually used in security-sensitive contexts.
+
 In order to use the directive described by this specification, GraphQL requires you to include the definition in your schema.
 
 :::[definition](inaccessible.spec.graphql)
@@ -71,7 +75,8 @@ In order to use the directive described by this specification, GraphQL requires 
 
 ## Processor Responsibilities
 
-The Processor is responsible for removing all inaccessible elements from the schema output. Note in the `InaccessibleRemoval` algorithm below that because a Union can belong to another Union's set of types, the removal of a Union type may have an upwards "cascading" effect, causing other Unions to become candidates for removal.
+The Processor is responsible for validating `@inaccessible` directive applications in the input core schema, and removing `@inaccessible` schema elements from that core schema to produce its output.
+
 # Algorithms
 
 ## Is Inaccessible?
