@@ -94,7 +94,7 @@ IsMarkedInaccessible(document, element) :
     1. If {assignments}`[`{element}`]` is a Directive whose `feature` argument is this spec, **Return** {true}
   3. **Return** {false}
 
-## Removed Inaccessible Elements
+## Remove Inaccessible Elements
 
 Given a schema document, return the set of all schema elements which should be removed in the API.
 
