@@ -72,6 +72,7 @@ In order to use the directive described by this specification, GraphQL requires 
 ## Processor Responsibilities
 
 The Processor is responsible for removing all inaccessible elements from the schema output. Note in the `InaccessibleRemoval` algorithm below that because a Union can belong to another Union's set of types, the removal of a Union type may have an upwards "cascading" effect, causing other Unions to become candidates for removal.
+
 # Algorithms
 
 ## Is Inaccessible?
