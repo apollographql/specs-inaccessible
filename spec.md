@@ -19,10 +19,6 @@ This specification provides machinery to remove fields and types in a *core sche
 
 This document uses [RFC 2119](https://www.ietf.org/rfc/rfc2119.txt) guidance regarding normative terms: MUST / MUST NOT / REQUIRED / SHALL / SHALL NOT / SHOULD / SHOULD NOT / RECOMMENDED / MAY / OPTIONAL.
 
-## What this document isn't
-
-This document specifies only the processing of a core schema. The mechanics of field and type omission are not specified normatively here. Conforming implementations may choose any approach they like, so long as the result conforms to the requirements of this document.
-
 # Definitions
 
 ## Processor
