@@ -79,11 +79,11 @@ The Processor is responsible for removing all inaccessible elements from the sch
 Return true if the named element {element} is inaccessible.
 
 IsInaccessible(document, element) :
-  0. If {IsMarkedInaccessible(document, element)}, **Return** {true}
-  1. If {element} is a FieldDefinition,
+  1. If {IsMarkedInaccessible(document, element)}, **Return** {true}
+  2. If {element} is a FieldDefinition,
     1. Let {parent} be the parent definition for {element}
     2. If {IsMarkedInaccessible(document, parent)}, **Return** {true}
-  2. **Return** {false}
+  3. **Return** {false}
 
 Return true iff the named element {element} is marked as inaccessible.
 
