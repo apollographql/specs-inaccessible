@@ -21,7 +21,7 @@ type User {
   id: String! @inaccessible
   name: String!
   email: String!
-  bankAccount: BankAccount
+  bankAccount: BankAccount @inaccessible
   accounts: [Account]
 }
 
